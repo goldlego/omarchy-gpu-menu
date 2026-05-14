@@ -6,9 +6,9 @@ xdata = pkgtype=pkg
 pkgver = 0.0.1-1
 pkgdesc = A visually appealing, Wofi-based GPU mode switcher for supergfxctl built for Omarchy
 url = https://github.com/goldlego/omarchy-gpu-menu
-builddate = 1778755789
+builddate = 1778749015
 packager = Unknown Packager
-size = 8144
+size = 7563
 arch = any
 license = MIT
 depend = bash

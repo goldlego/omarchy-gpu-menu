@@ -37,17 +37,9 @@ window {
     color: @foreground;
 }
 
-/* Selected Entry Container */
+/* Selected Entry */
 #entry:selected {
     background-color: @foreground;
-    border-radius: 10px;
+    color: @background; /* Invert text color for readability */
     outline: none;
-}
-
-/* Force EVERYTHING inside the selected entry (like the GTK label) to invert */
-#entry:selected label,
-#entry:selected * {
-    color: @background;
-    background-color: transparent;
-    font-weight: bold;
 }

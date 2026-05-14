@@ -97,12 +97,18 @@ if [ -n "$CHOSEN" ]; then
 
         "Hybrid")
             # Batch all root commands into one string
-            run_as_root "
-                sed -i 's/\"mode\": \".*\"/\"mode\": \"Hybrid\"/' /etc/supergfxd.conf
-                sed -i 's/\"vfio_enable\": true/\"vfio_enable\": false/' /etc/supergfxd.conf
-                rm -f /usr/lib/systemd/system-sleep/force-igpu
-                rm -f /etc/systemd/system/supergfxd.service.d/delay-start.conf
-            "
+            if [ "$CURRENT_MODE" == "AsusMuxDgpu" ]; then 
+                supergfxctl -m "Hybrid"
+            fi
+
+            if [ "$CURRENT_MODE" != "AsusMuxDgpu" ]; then
+                run_as_root "
+                  sed -i 's/\"mode\": \".*\"/\"mode\": \"Hybrid\"/' /etc/supergfxd.conf
+                  sed -i 's/\"vfio_enable\": true/\"vfio_enable\": false/' /etc/supergfxd.conf
+                  rm -f /usr/lib/systemd/system-sleep/force-igpu
+                  rm -f /etc/systemd/system/supergfxd.service.d/delay-start.conf
+                "
+            fi
             notify-send "GPU Mode" "Rebooting to safely apply Hybrid mode..."
             sleep 1
             omarchy-system-reboot
