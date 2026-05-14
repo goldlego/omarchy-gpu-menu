@@ -37,15 +37,9 @@ window {
     color: @foreground;
 }
 
-/* Selected Entry Container */
+/* Selected Entry */
 #entry:selected {
     background-color: @foreground;
-    border-radius: 10px;
+    color: @background; /* Invert text color for readability */
     outline: none;
-}
-
-/* Selected Entry Text - Explicitly invert the text color */
-#entry:selected #text {
-    color: @background;
-    font-weight: bold; /* Optional: Makes the selected text pop a bit more */
 }
