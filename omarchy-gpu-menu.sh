@@ -26,6 +26,9 @@ if omarchy-cmd-missing supergfxctl; then
     omarchy-pkg-add supergfxctl
     sudo systemctl enable --now supergfxd
 fi
+if omarchy-cmd-missing wofi; then
+    omarchy-pkg-add wofi
+fi
 
 mkdir -p "$STATE_DIR"
 
@@ -55,8 +58,23 @@ if [ "$CURRENT_MODE" != "AsusMuxDgpu" ]; then
     echo "$ALL_MODES" > "$STATE_FILE"
 fi
 
-# Pipe the list into Rofi
-CHOSEN=$(echo "$ALL_MODES" | rofi -dmenu -i -p "GPU (Current: $CURRENT_MODE)")
+# Define paths with fallbacks: Local folder first, then System folder
+if [ -f "./config/gpu-menu.conf" ]; then
+    # We are running from the dev folder
+    CONF_PATH="./config/gpu-menu.conf"
+    STYLE_PATH="./config/gpu-style.css"
+else
+    # We are running the installed version
+    CONF_PATH="/etc/omarchy/wofi/gpu-menu.conf"
+    STYLE_PATH="/etc/omarchy/wofi/gpu-style.css"
+fi
+
+# Pipe the list into Wofi with custom styling
+CHOSEN=$(echo "$ALL_MODES" | wofi --show dmenu \
+    --conf "$CONF_PATH" \
+    --style "$STYLE_PATH" \
+    --prompt "GPU (Current: $CURRENT_MODE)" \
+    --insensitive)
 
 # Apply the chosen mode
 if [ -n "$CHOSEN" ]; then
@@ -75,30 +93,30 @@ if [ -n "$CHOSEN" ]; then
             # Safe Switch: Edit config, enable VFIO, apply sleep fixes, then reboot
             sudo sed -i 's/"mode": ".*"/"mode": "Integrated"/' /etc/supergfxd.conf
             sudo sed -i 's/"vfio_enable": false/"vfio_enable": true/' /etc/supergfxd.conf
-            
+
             sudo mkdir -p /usr/lib/systemd/system-sleep
             sudo cp -p "$OMARCHY_PATH/default/systemd/system-sleep/force-igpu" /usr/lib/systemd/system-sleep/
             sudo mkdir -p /etc/systemd/system/supergfxd.service.d
             sudo cp -p "$OMARCHY_PATH/default/systemd/system/supergfxd.service.d/delay-start.conf" /etc/systemd/system/supergfxd.service.d/
-            
+
             notify-send "GPU Mode" "Rebooting to safely apply Integrated mode..."
             sleep 1
             omarchy-system-reboot
             ;;
-            
+
         "Hybrid")
             # Safe Switch: Edit config, disable VFIO, remove sleep fixes, then reboot
             sudo sed -i 's/"mode": ".*"/"mode": "Hybrid"/' /etc/supergfxd.conf
             sudo sed -i 's/"vfio_enable": true/"vfio_enable": false/' /etc/supergfxd.conf
-            
+
             sudo rm -f /usr/lib/systemd/system-sleep/force-igpu
             sudo rm -f /etc/systemd/system/supergfxd.service.d/delay-start.conf
-            
+
             notify-send "GPU Mode" "Rebooting to safely apply Hybrid mode..."
             sleep 1
             omarchy-system-reboot
             ;;
-            
+
         "AsusMuxDgpu")
             # Hardware MUX switch requires ACPI call and a strict reboot
             supergfxctl -m "AsusMuxDgpu"
@@ -106,7 +124,7 @@ if [ -n "$CHOSEN" ]; then
             sleep 1
             omarchy-system-reboot
             ;;
-            
+
         "Vfio")
             # VFIO binding for passthrough. Usually requires a logout to kill X11/Wayland tasks on the dGPU
             supergfxctl -m "Vfio"
