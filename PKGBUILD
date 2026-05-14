@@ -12,7 +12,7 @@ depends=('bash' 'wofi' 'supergfxctl' 'libnotify')
 
 # Assuming the GitHub repo is named 'omarchy-gpu-menu' in all lowercase
 source=("$pkgname-$pkgver.tar.gz::https://github.com/goldlego/$pkgname/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('597667af9eb0037ed1d0a43dd6aa007523cac751e82dabd564e336759be84cf0')
+sha256sums=('d0a7a79effadc05108806a2eabea924e1922e7983fa6fcda0a8c53c73b4e69f8')
 
 package() {
     cd "$pkgname-$pkgver"
