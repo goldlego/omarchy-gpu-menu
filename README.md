@@ -12,6 +12,8 @@ Under the hood, it acts as a smart, safe wrapper for supergfxctl, handling VFIO 
  
  - Hardware MUX Aware: Prevents incompatible mode switching if the physical Asus MUX switch (AsusMuxDgpu) is engaged.
  
+ - Polkit Integrated: Primes sudo/pkexec so you never get stuck with an invisible terminal password prompt.
+ 
  - Zero Clutter: A perfectly sized, centered Wofi window with no unnecessary scrollbars or text entry boxes.
 
 # Dependencies

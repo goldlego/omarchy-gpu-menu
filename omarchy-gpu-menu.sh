@@ -1,21 +1,25 @@
 #!/bin/bash
 
-# --- Sudo Pre-Check ---
-# Prime the sudo cache upfront so background commands don't hang.
-# If running without a terminal (e.g., from a keybind), use a graphical prompt.
-# if ! sudo -n true 2>/dev/null; then
-#     if [ -t 0 ]; then
-#         # Running in a terminal
-#         sudo -v || exit 1
-#     elif command -v pkexec >/dev/null 2>&1; then
-#         # Running via GUI/Shortcut
-#         pkexec true || exit 1
-#     else
-#         notify-send "GPU Menu Error" "Requires sudo privileges. Run from terminal or install polkit."
-#         exit 1
-#     fi
-# fi
-# ----------------------
+# --- Sudo Check Function ---
+# Primes the sudo cache/polkit only when called.
+require_sudo() {
+    if ! sudo -n true 2>/dev/null; then
+        if [ -t 0 ]; then
+            # Running in a terminal
+            sudo -v || exit 1
+        elif command -v pkexec >/dev/null 2>&1; then
+            # Running via GUI/Shortcut
+            # Note: For this to work perfectly with subsequent 'sudo' commands, 
+            # your polkit/sudoers must be configured to share credentials, 
+            # or you may need to use pkexec directly for the commands below.
+            pkexec true || exit 1
+        else
+            notify-send "GPU Menu Error" "Requires sudo privileges. Run from terminal or install polkit."
+            exit 1
+        fi
+    fi
+}
+# ---------------------------
 
 # GPU modes cached in these locations
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy-gpu-menu"
@@ -23,9 +27,12 @@ STATE_FILE="$STATE_DIR/supported_modes.txt"
 
 # Ensure supergfxctl is installed and running
 if omarchy-cmd-missing supergfxctl; then
+    # We need root to install and enable services!
+    require_sudo 
     omarchy-pkg-add supergfxctl
     sudo systemctl enable --now supergfxd
 fi
+
 if omarchy-cmd-missing wofi; then
     omarchy-pkg-add wofi
 fi
@@ -82,6 +89,10 @@ if [ -n "$CHOSEN" ]; then
         notify-send "GPU Mode" "Already in $CHOSEN mode."
         exit 0
     fi
+
+    # --- THE MAGIC HAPPENS HERE ---
+    # The user has made a valid selection that requires changes. Ask for password now!
+    require_sudo
 
     notify-send "GPU Mode" "Preparing switch to $CHOSEN..."
 
