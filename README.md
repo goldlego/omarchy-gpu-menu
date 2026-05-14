@@ -65,6 +65,12 @@ Keybind: Map omarchy-gpu-menu to a custom keybind in your Hyprland/Sway config. 
 bind = $mainMod SHIFT, G, exec, omarchy-gpu-menu
 
 
+Or if your keyboard has a dedicated button for armoury-crate or others for this:
+
+```bash
+bindd = ,XF86Launch3, Switch GPU, exec, omarchy-gpu-menu
+```
+
 🛠️ Configuration & Customization
 
 If you want to tweak the size, layout, or fall-back colors, the configuration files are installed system-wide.
